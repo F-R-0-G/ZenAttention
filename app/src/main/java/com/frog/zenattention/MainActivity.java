@@ -22,14 +22,27 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frog.zenattention.utils.ActivityCollector;
+import com.frog.zenattention.utils.AlarmClock;
 import com.frog.zenattention.utils.ToastUtil;
+import com.shawnlin.numberpicker.NumberPicker;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private Chronometer chronometer;
+    private ProgressBar progressBar;
+    private NumberPicker numberPicker;
+    private Button stopButton;
+    private Button cancelButton;
+    private Button resumeButton;
+    private Button startAttachAttention;
+    private AlarmClock alarm_clock;
 
     Button start_music;
     Button pause_music;
@@ -66,11 +79,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         start_music = (Button) findViewById(R.id.start_music);
         pause_music = (Button) findViewById(R.id.pause_music);
         open_drawer = (Button) findViewById(R.id.open_drawer);
-        start_attention = (Button) findViewById(R.id.start_attach_attention);
         start_music.setOnClickListener(this);
         pause_music.setOnClickListener(this);
         open_drawer.setOnClickListener(this);
-        start_attention.setOnClickListener(this);
 
         start_music.setVisibility(View.VISIBLE);
         pause_music.setVisibility(View.INVISIBLE);
@@ -93,6 +104,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         quote1.setTypeface(tf);
         quote2.setTypeface(tf);
         //
+        chronometer = findViewById(R.id.Clock_chronometer);
+        chronometer.setVisibility(View.INVISIBLE);
+        progressBar = findViewById(R.id.Clock_ProgressBar);
+        // 创建计时器和进度条
+        numberPicker = findViewById(R.id.number_picker);
+        String[] displayNumber = new String[13];
+        displayNumber[0] = "1:00";
+        for (int i = 1; i < 13; i++){
+            displayNumber[i] = Integer.toString(i*5) + ":" + "00";
+        }
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(displayNumber.length);
+        numberPicker.setDisplayedValues(displayNumber);
+        numberPicker.setValue(6);
+        // 创建时间选择器
+        startAttachAttention = findViewById(R.id.start_attach_attention);
+        startAttachAttention.setOnClickListener(this);
+        //开始专注按钮
+        stopButton = findViewById(R.id.stop_button);
+        stopButton.setOnClickListener(this);
+        stopButton.setVisibility(View.INVISIBLE);
+        // 暂停按钮，设为不可见
+        cancelButton = findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(this);
+        cancelButton.setVisibility(View.INVISIBLE);
+        // 取消按钮，设为不可见
+        resumeButton = findViewById(R.id.resume_button);
+        resumeButton.setOnClickListener(this);
+        resumeButton.setVisibility(View.INVISIBLE);
+        //继续按钮，设为不可见
+        alarm_clock = new AlarmClock(chronometer, progressBar, MainActivity.this, numberPicker);
+        // 计时器实例
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -100,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switch (item.getItemId()) {
                     case R.id.nav_statistics:
                         //统计
+                        Intent intent = new Intent(MainActivity.this, checkStatistic.class);
+                        startActivity(intent);
                         break;
                     case R.id.nav_target:
                         //目标
@@ -149,6 +194,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawerLayout.openDrawer(GravityCompat.START);
                 break;
             case R.id.start_attach_attention:
+                int num = numberPicker.getValue();
+                alarm_clock.startCounting(num, startAttachAttention, stopButton);
+                startAttachAttention.setVisibility(View.INVISIBLE);
+                stopButton.setVisibility(View.VISIBLE);
+                break;
+            case R.id.resume_button:
+                stopButton.setVisibility(View.VISIBLE);
+                resumeButton.setVisibility(View.INVISIBLE);
+                cancelButton.setVisibility(View.INVISIBLE);
+                alarm_clock.resumeAlarm();
+                break;
+            case R.id.stop_button:
+                resumeButton.setVisibility(View.VISIBLE);
+                cancelButton.setVisibility(View.VISIBLE);
+                stopButton.setVisibility(View.INVISIBLE);
+                alarm_clock.pauseAlarm();
+                break;
+            case R.id.cancel_button:
+                resumeButton.setVisibility(View.INVISIBLE);
+                cancelButton.setVisibility(View.INVISIBLE);
+                alarm_clock.cancelAlarm();
                 break;
             default:
                 break;
