@@ -38,6 +38,7 @@ public class checkStatistic extends AppCompatActivity {
         setContentView(R.layout.activity_check_statistic);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
         BarChart barChart = findViewById(R.id.chart);
         List<BarEntry> entries = new ArrayList<>();
