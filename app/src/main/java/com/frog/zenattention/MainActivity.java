@@ -1,6 +1,7 @@
 package com.frog.zenattention;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -16,11 +17,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
@@ -33,16 +37,19 @@ import com.frog.zenattention.utils.AlarmClock;
 import com.frog.zenattention.utils.ToastUtil;
 import com.shawnlin.numberpicker.NumberPicker;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener{
 
     private Chronometer chronometer;
     private ProgressBar progressBar;
+    private ProgressBar cancel_bar;
     private NumberPicker numberPicker;
     private Button stopButton;
     private Button cancelButton;
     private Button resumeButton;
     private Button startAttachAttention;
     private AlarmClock alarm_clock;
+    private boolean isCancel = true;
+    private ValueAnimator animator;
 
     Button start_music;
     Button pause_music;
@@ -57,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     MediaPlayer mediaPlayer;
 
+    private static final String TAG = "MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +115,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         chronometer = findViewById(R.id.Clock_chronometer);
         chronometer.setVisibility(View.INVISIBLE);
         progressBar = findViewById(R.id.Clock_ProgressBar);
-        // 创建计时器和进度条
+        cancel_bar = findViewById(R.id.cancel_progressBar);
+        cancel_bar.setVisibility(View.INVISIBLE);
+        // 创建计时器和进度条, 将cancel_bar设为不可见
         numberPicker = findViewById(R.id.number_picker);
         String[] displayNumber = new String[13];
         displayNumber[0] = "1:00";
@@ -127,14 +137,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         stopButton.setVisibility(View.INVISIBLE);
         // 暂停按钮，设为不可见
         cancelButton = findViewById(R.id.cancel_button);
-        cancelButton.setOnClickListener(this);
+        cancelButton.setOnTouchListener(this);
         cancelButton.setVisibility(View.INVISIBLE);
         // 取消按钮，设为不可见
         resumeButton = findViewById(R.id.resume_button);
         resumeButton.setOnClickListener(this);
         resumeButton.setVisibility(View.INVISIBLE);
         //继续按钮，设为不可见
-        alarm_clock = new AlarmClock(chronometer, progressBar, MainActivity.this, numberPicker);
+        alarm_clock = new AlarmClock(chronometer, progressBar,
+                MainActivity.this, numberPicker);
         // 计时器实例
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -211,14 +222,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 stopButton.setVisibility(View.INVISIBLE);
                 alarm_clock.pauseAlarm();
                 break;
-            case R.id.cancel_button:
-                resumeButton.setVisibility(View.INVISIBLE);
-                cancelButton.setVisibility(View.INVISIBLE);
-                alarm_clock.cancelAlarm();
-                break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (v.getId()) {
+            case R.id.cancel_button:
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    cancel_bar.setVisibility(View.VISIBLE);
+                    animator = ValueAnimator.ofInt(0, 100);
+                    animator.setDuration(2000);
+                    animator.setInterpolator(new LinearInterpolator());
+                    animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animation) {
+                            int value = (int) animator.getAnimatedValue();
+                            Log.e(TAG, Integer.toString(value));
+                            cancel_bar.setProgress(value);
+                            if (value == 100){
+                                cancel_bar.setProgress(0);
+                                if (!isCancel){
+                                    isCancel = true;
+                                    return;
+                                }
+                                resumeButton.setVisibility(View.INVISIBLE);
+                                cancelButton.setVisibility(View.INVISIBLE);
+                                alarm_clock.cancelAlarm();
+                                ToastUtil.showToast(MainActivity.this, "计时器已被取消");
+                            }
+                        }
+                    });
+                    animator.start();
+                }
+                if(event.getAction() == MotionEvent.ACTION_UP){
+                    isCancel = false;
+                    animator.end();
+                    cancel_bar.setVisibility(View.INVISIBLE);
+                }
+            default:
+                break;
+        }
+        return false;
     }
 
     private void initMediaPlayer() {
