@@ -2,6 +2,7 @@ package com.frog.zenattention;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -9,6 +10,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private AlarmClock alarm_clock;
     private boolean isCancel = true;
     private ValueAnimator animator;
+    private Vibrator vibrator;
 
     Button start_music;
     Button pause_music;
@@ -144,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         resumeButton.setOnClickListener(this);
         resumeButton.setVisibility(View.INVISIBLE);
         //继续按钮，设为不可见
+        vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
         alarm_clock = new AlarmClock(chronometer, progressBar,
                 MainActivity.this, numberPicker);
         // 计时器实例
@@ -209,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 alarm_clock.startCounting(num, startAttachAttention, stopButton);
                 startAttachAttention.setVisibility(View.INVISIBLE);
                 stopButton.setVisibility(View.VISIBLE);
+                vibrator.vibrate(50);
                 break;
             case R.id.resume_button:
                 stopButton.setVisibility(View.VISIBLE);
@@ -232,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.cancel_button:
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    vibrator.vibrate(50);               // 震动
                     cancel_bar.setVisibility(View.VISIBLE);
                     animator = ValueAnimator.ofInt(0, 100);
                     animator.setDuration(2000);
@@ -240,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
                             int value = (int) animator.getAnimatedValue();
-                            Log.e(TAG, Integer.toString(value));
                             cancel_bar.setProgress(value);
                             if (value == 100){
                                 cancel_bar.setProgress(0);
@@ -248,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     isCancel = true;
                                     return;
                                 }
+                                cancel_bar.setVisibility(View.INVISIBLE);
                                 resumeButton.setVisibility(View.INVISIBLE);
                                 cancelButton.setVisibility(View.INVISIBLE);
                                 alarm_clock.cancelAlarm();

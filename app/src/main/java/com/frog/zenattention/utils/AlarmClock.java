@@ -4,7 +4,10 @@ import android.animation.ValueAnimator;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
@@ -18,12 +21,16 @@ public class AlarmClock {
     private Chronometer chronometer;
     private ProgressBar progressBar;
     private NumberPicker numberPicker;
-    private ValueAnimator valueAnimator;
     private static final int MAX_PROGRESS = 10000;
     private long selectTime;
     private Context context;
     private long pauseTime;
     private boolean isCancel = false;
+    private long startTime;
+    CountDownTimer countDownTimer;
+    private Button startButton;
+    private Button stopButton;
+    private long leftTime;
 
     private static final String TAG = "Alarm_Clock";
 
@@ -35,60 +42,57 @@ public class AlarmClock {
         this.numberPicker = numberPicker;
     }
 
-
-    public long startCounting(final int numberChoosed, Button startButton, Button stopButton){
+    public void startCounting(final int numberChoosed, Button startButton, Button stopButton){
+        this.startButton = startButton;
+        this.stopButton = stopButton;
         numberPicker.setVisibility(View.INVISIBLE);
         chronometer.setVisibility(View.VISIBLE);
         if (numberChoosed == 1) selectTime = 60 * 1000;
         else selectTime = (numberChoosed - 1) * 5 * 60 * 1000;
         ToastUtil.showToast(context, "设置成功");
 
+        startTime = SystemClock.elapsedRealtime();
         chronometer.setBase(SystemClock.elapsedRealtime() + selectTime);  // 设置倒计时
         chronometer.setCountDown(true);
         chronometer.start();
-        initProgressBar(selectTime, startButton, stopButton);
-
-        return selectTime;
-    }
-
-    // 初始化一个ProgressBar，并在结束时停止chronometer
-    private void initProgressBar(long duration, final Button startButton,
-                                 final Button stopButton) {
         progressBar.setMax(MAX_PROGRESS);
         progressBar.setProgress(0);
+        startCountDownTimer(selectTime);
+    }
 
-        valueAnimator = ValueAnimator.ofInt(0, MAX_PROGRESS);
-        valueAnimator.setDuration(duration);
-        valueAnimator.setInterpolator(new LinearInterpolator());
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    private void startCountDownTimer(long duration){
+        countDownTimer = new CountDownTimer(duration, 10) {
             @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int value = (int) valueAnimator.getAnimatedValue();
-                progressBar.setProgress(value);
-                if (value == MAX_PROGRESS) {
-                    chronometer.stop();
-                    progressBar.setProgress(0);
-                    chronometer.setVisibility(View.INVISIBLE);
-                    numberPicker.setVisibility(View.VISIBLE);
-                    startButton.setVisibility(View.VISIBLE);
-                    stopButton.setVisibility(View.INVISIBLE);
-                    if (isCancel){
-                        isCancel = false;
-                        return;
-                    }
-                    AttentionTimeData.storeTime(selectTime, context);      // 存储时间数据
-                    Intent intent = new Intent(context, MainActivity.class);
-                    PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    NotificationUtils notification = new NotificationUtils(context);
-                    notification.sendNotification("时间","预设时间到", pi);
-                }
+            public void onTick(long millisUntilFinished) {
+                int percentage = (int) ((selectTime - millisUntilFinished) * 10000 / selectTime);
+                leftTime = millisUntilFinished;
+                progressBar.setProgress(percentage);
             }
-        });
-        valueAnimator.start();
+
+            @Override
+            public void onFinish() {
+                chronometer.stop();
+                progressBar.setProgress(0);
+                chronometer.setVisibility(View.INVISIBLE);
+                numberPicker.setVisibility(View.VISIBLE);
+                startButton.setVisibility(View.VISIBLE);
+                stopButton.setVisibility(View.INVISIBLE);
+                if (isCancel){
+                    isCancel = false;
+                    return;
+                }
+                AttentionTimeData.storeTime(selectTime, context);      // 存储时间数据
+                Intent intent = new Intent(context, MainActivity.class);
+                PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                NotificationUtils notification = new NotificationUtils(context);
+                notification.sendNotification("时间","预设时间到", pi);
+            }
+        };
+        countDownTimer.start();
     }
 
     public void pauseAlarm(){
-        valueAnimator.pause();
+        countDownTimer.cancel();
         chronometer.stop();
         pauseTime = SystemClock.elapsedRealtime();
     }
@@ -100,12 +104,12 @@ public class AlarmClock {
         else {
             chronometer.setBase(SystemClock.elapsedRealtime());
         }
-        valueAnimator.resume();
         chronometer.start();
+        startCountDownTimer(leftTime);
     }
 
     public void cancelAlarm(){
         isCancel = true;
-        valueAnimator.end();
+        countDownTimer.onFinish();
     }
 }
