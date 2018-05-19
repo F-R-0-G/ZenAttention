@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#B4A582</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#B4A582</color>
+    <color name="colorPrimaryDark">#897D55</color>
+    <color name="colorAccent">#B5495B</color>
     <color name="white">#FFFFFF</color>
     <color name="cream">#FFEFD5</color>
     <color name="clock_background">#C7802D</color>
-    <color name="clock_start">#B5495B</color>
-    <color name="Button_theme1">#B4A582</color>
 </resources>

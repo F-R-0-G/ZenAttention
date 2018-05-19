@@ -37,7 +37,7 @@ public class checkStatistic extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getWindow().setNavigationBarColor(Color.parseColor("#B4A582"));          // 设置底部导航栏的颜色
+        getWindow().setNavigationBarColor(Color.parseColor("#897D55"));          // 设置底部导航栏的颜色
 
         setContentView(R.layout.activity_check_statistic);
 
@@ -79,7 +79,7 @@ public class checkStatistic extends AppCompatActivity {
 
         barChart.setData(data);
         set.setValueTextSize(15f);         // 设置柱状图上方的值的字体
-        set.setColors(new int[]{Color.rgb(180, 165, 130)});
+        set.setColors(new int[]{Color.parseColor("#B4A582")});
         data.setBarWidth(0.9f);
         barChart.setFitBars(true);
         barChart.setNoDataText("你还没有开始专注");

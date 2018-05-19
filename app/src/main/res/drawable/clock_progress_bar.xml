@@ -11,8 +11,8 @@
 
         <gradient
             android:angle="0"
-            android:endColor="@color/clock_start"
-            android:startColor="@color/clock_start"
+            android:endColor="@color/colorAccent"
+            android:startColor="@color/colorAccent"
             android:type="sweep"
             android:useLevel="false" />
     </shape>

@@ -51,8 +51,7 @@
                 android:text="开始专注"
                 android:textSize="25sp"
                 android:textColor="#fff"
-                android:background="@drawable/start_button_bg"
-                android:theme="@style/ButtonStyle"
+                android:background="@drawable/button_bg"
                 />
 
             <Button
@@ -64,8 +63,7 @@
                 android:text="暂停"
                 android:textSize="25sp"
                 android:textColor="#fff"
-                android:background="@drawable/start_button_bg"
-                android:theme="@style/ButtonStyle"
+                android:background="@drawable/button_bg"
                 />
 
             <Button
@@ -77,8 +75,7 @@
                 android:text="继续"
                 android:textSize="25sp"
                 android:textColor="#fff"
-                android:background="@drawable/start_button_bg"
-                android:theme="@style/ButtonStyle"
+                android:background="@drawable/button_bg"
                 />
 
             <Button
@@ -90,8 +87,7 @@
                 android:text="长按取消"
                 android:textSize="25sp"
                 android:textColor="#fff"
-                android:background="@drawable/start_button_bg"
-                android:theme="@style/ButtonStyle"
+                android:background="@drawable/button_bg"
                 />
         </com.zhy.autolayout.AutoRelativeLayout>
     </com.zhy.autolayout.AutoLinearLayout>

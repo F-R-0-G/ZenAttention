@@ -277,7 +277,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 resumeButton.setVisibility(View.INVISIBLE);
                                 cancelButton.setVisibility(View.INVISIBLE);
                                 alarm_clock.cancelAlarm();
-                                ToastUtil.showToast(MainActivity.this, "计时器已被取消");
+                                ToastUtil.showToast(MainActivity.this, "计时已取消");
+                                vibrator.vibrate(50);
                             }
                         }
                     });
