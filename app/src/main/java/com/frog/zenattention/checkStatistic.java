@@ -35,10 +35,11 @@ public class checkStatistic extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_check_statistic);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        getWindow().setNavigationBarColor(Color.parseColor("#B4A582"));          // 设置底部导航栏的颜色
+
+        setContentView(R.layout.activity_check_statistic);
 
         BarChart barChart = findViewById(R.id.chart);
         List<BarEntry> entries = new ArrayList<>();

@@ -2,18 +2,27 @@ package com.frog.zenattention;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.app.AppOpsManager;
+import android.app.Application;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -38,6 +47,10 @@ import com.frog.zenattention.utils.ActivityCollector;
 import com.frog.zenattention.utils.AlarmClock;
 import com.frog.zenattention.utils.ToastUtil;
 import com.shawnlin.numberpicker.NumberPicker;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener{
 
@@ -148,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         resumeButton.setVisibility(View.INVISIBLE);
         //继续按钮，设为不可见
         vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
+        // 震动
         alarm_clock = new AlarmClock(chronometer, progressBar,
                 MainActivity.this, numberPicker);
         // 计时器实例
@@ -161,9 +175,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Intent intent = new Intent(MainActivity.this, checkStatistic.class);
                         startActivity(intent);
                         break;
-                    case R.id.nav_target:
-                        //目标
-                        break;
+//                    case R.id.nav_target:
+//                        //目标
+//                        break;
                     case R.id.nav_theme:
                         ToastUtil.showToast(MainActivity.this,"theme",Toast.LENGTH_SHORT);
                         //主题
@@ -179,6 +193,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+//        NotificationManagerCompat manager = NotificationManagerCompat.from(MainActivity.this);
+//        boolean isOpened = isNotificationEnabled(MainActivity.this);        // 给予通知权限
+//
+//        if (!isOpened){
+//            ToastUtil.showToast(MainActivity.this, "请开启所有通知权限，否则无法发送通知");
+//        }
     }
 
     @Override

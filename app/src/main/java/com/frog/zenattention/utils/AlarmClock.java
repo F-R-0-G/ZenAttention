@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.CountDownTimer;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.util.Log;
@@ -82,10 +83,22 @@ public class AlarmClock {
                     return;
                 }
                 AttentionTimeData.storeTime(selectTime, context);      // 存储时间数据
+
                 Intent intent = new Intent(context, MainActivity.class);
                 PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
                 NotificationUtils notification = new NotificationUtils(context);
                 notification.sendNotification("时间","预设时间到", pi);
+
+                PowerManager pm = (PowerManager) context       // 点亮屏幕
+                        .getSystemService(Context.POWER_SERVICE);
+                boolean screenOn = pm.isScreenOn();
+                if (!screenOn) {
+                    PowerManager.WakeLock wl = pm.newWakeLock(
+                            PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "bright");
+                    wl.acquire(10000); // 点亮屏幕
+                    wl.release(); // 释放
+                }
             }
         };
         countDownTimer.start();
